@@ -1,0 +1,16 @@
+{
+  "lr": 0.001,
+  "gamma": 0.95,
+  "batch_size": 16,
+  "eps_start": 1.0,
+  "eps_end": 0.01,
+  "eps_decay": 25000,
+  "total_steps": 100000,
+  "buffer_size": 50000,
+  "learning_starts": 10000,
+  "train_freq": 4,
+  "target_update": 1000,
+  "seed": 42,
+  "member": "Larissa",
+  "experiment": 7
+}
