@@ -55,14 +55,17 @@ def get_output_paths(args):
 
 
 def get_epsilon(step, eps_start, eps_end, eps_decay):
+    # epsilon goes down in a straight line, then stays at eps_end
     fraction = min(step / eps_decay, 1.0)
     return eps_start + fraction * (eps_end - eps_start)
 
 
 def select_action(online_net, state, epsilon, num_actions, device):
+    # explore: random action with probability epsilon
     if random.random() < epsilon:
         return random.randrange(num_actions)
 
+    # exploit: action with the highest Q-value
     with torch.no_grad():
         state_tensor = torch.as_tensor(state, device=device).unsqueeze(0)
         q_values = online_net(state_tensor)
@@ -77,16 +80,20 @@ def train_step(online_net, target_net, optimizer, replay_buffer, batch_size, gam
     next_states = torch.as_tensor(next_states, device=device)
     dones = torch.as_tensor(dones, device=device)
 
+    # Q-values from the online network, only for the actions we actually took
     q_values = online_net(states).gather(1, actions.unsqueeze(1)).squeeze(1)
 
+    # Bellman target from the target network, (1 - dones) removes the future when the game ended
     with torch.no_grad():
         max_next_q = target_net(next_states).max(dim=1).values
         target_q = rewards + gamma * max_next_q * (1 - dones)
 
+    # Huber loss is less affected by big errors than MSE
     loss = F.smooth_l1_loss(q_values, target_q)
 
     optimizer.zero_grad()
     loss.backward()
+    # clip gradients so one bad batch can't make a huge update
     torch.nn.utils.clip_grad_norm_(online_net.parameters(), max_norm=10)
     optimizer.step()
     return loss.item()
@@ -144,6 +151,7 @@ def main():
 
     online_net = QNetwork(num_actions).to(device)
     target_net = QNetwork(num_actions).to(device)
+    # target network starts as a copy of the online network
     target_net.load_state_dict(online_net.state_dict())
     target_net.eval()
 
@@ -160,16 +168,19 @@ def main():
         action = select_action(online_net, state, epsilon, num_actions, device)
         next_state, reward, terminated, truncated, _ = env.step(action)
 
+        # only terminated counts as done, truncated just means time ran out
         replay_buffer.add(state, action, reward, next_state, terminated)
         state = next_state
         episode_reward += reward
         episode_length += 1
 
+        # fill the buffer first, then train every train_freq steps
         if step > args.learning_starts and step % args.train_freq == 0:
             loss = train_step(online_net, target_net, optimizer, replay_buffer,
                               args.batch_size, args.gamma, device)
             episode_losses.append(loss)
 
+        # copy the online weights into the target network
         if step % args.target_update == 0:
             target_net.load_state_dict(online_net.state_dict())
 
@@ -187,6 +198,7 @@ def main():
             episode_reward, episode_length, episode_losses = 0.0, 0, []
             state, _ = env.reset()
 
+        # save a checkpoint in the middle in case training stops
         if step % 50_000 == 0:
             torch.save(online_net.state_dict(), model_path)
 

@@ -1,5 +1,12 @@
 # Deep Q-Learning on Atari Freeway
 
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![PyTorch](https://img.shields.io/badge/PyTorch-DQN-EE4C2C?logo=pytorch&logoColor=white)
+![Gymnasium](https://img.shields.io/badge/Gymnasium-Atari-0081A5)
+![ALE](https://img.shields.io/badge/ALE-Freeway--v5-8A2BE2)
+![uv](https://img.shields.io/badge/uv-package%20manager-DE5FE9?logo=uv&logoColor=white)
+![NumPy](https://img.shields.io/badge/NumPy-arrays-2E7D32?logo=numpy&logoColor=white)
+
 ## Project Introduction
 
 This project trains a Deep Q-Network (DQN) agent to play the Atari game **Freeway** using PyTorch and Gymnasium. The DQN is written from scratch: the convolutional network, replay buffer, epsilon-greedy exploration, target network and training loop are all our own code. No ready-made reinforcement learning library (Stable-Baselines3, RLlib, CleanRL, TorchRL) is used.
@@ -14,7 +21,7 @@ Each group member ran 10 hyperparameter experiments. The best configuration was 
 | Divine Itu | 10 hyperparameter experiments |
 | Larissa Inyange | 10 hyperparameter experiments, `play.py` |
 
-See `Task allocation sheet.pdf` for the full division of work.
+See the [Task allocation sheet](Task%20allocation%20sheet.pdf) for the full division of work and our meeting log.
 
 ## Selected Atari Environment
 
@@ -153,9 +160,9 @@ The full episode log is in `logs/dqn_model.csv`.
 
 ## Gameplay Demonstration
 
-https://github.com/jjjj
+**Video:** [Watch the trained agent play Freeway (Loom)](https://www.loom.com/share/f8b0bd4b2b584ca5b327acbaefac31cc)
 
-The video shows the final agent (`dqn_model.pth`) playing a full game of Freeway with greedy actions. It scores about 21 crossings per game, compared with about 0 for a random agent.
+The video shows the final agent (`dqn_model.pth`) playing Freeway with greedy actions through `play.py`. It scores about 21 crossings per game, compared with about 0 for a random agent.
 
 ## How to Run
 

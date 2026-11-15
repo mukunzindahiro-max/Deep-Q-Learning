@@ -7,6 +7,7 @@ class ReplayBuffer:
         self.position = 0
         self.size = 0
 
+        # frames are saved as uint8 to save memory
         self.states = np.zeros((capacity, *state_shape), dtype=np.uint8)
         self.next_states = np.zeros((capacity, *state_shape), dtype=np.uint8)
         self.actions = np.zeros(capacity, dtype=np.int64)
@@ -20,10 +21,12 @@ class ReplayBuffer:
         self.next_states[self.position] = next_state
         self.dones[self.position] = done
 
+        # when the buffer is full we start overwriting the oldest experience
         self.position = (self.position + 1) % self.capacity
         self.size = min(self.size + 1, self.capacity)
 
     def sample(self, batch_size):
+        # random batch, so the network doesn't only learn from frames that come one after another
         indices = np.random.randint(0, self.size, size=batch_size)
         return (
             self.states[indices],

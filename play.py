@@ -14,6 +14,7 @@ def parse_args():
 
 
 def select_greedy_action(q_network, state):
+    # no random moves here, we just take the action with the highest Q-value
     with torch.no_grad():
         state_tensor = torch.as_tensor(state).unsqueeze(0)
         q_values = q_network(state_tensor)
@@ -23,9 +24,11 @@ def select_greedy_action(q_network, state):
 def main():
     args = parse_args()
 
+    # "human" opens a window so we can watch the game live
     env = make_env(render_mode="human")
     num_actions = env.action_space.n
 
+    # same network as in training, then load the saved weights
     q_network = QNetwork(num_actions)
     q_network.load_state_dict(torch.load(args.model, map_location="cpu"))
     q_network.eval()
@@ -38,6 +41,7 @@ def main():
         while not done:
             action = select_greedy_action(q_network, state)
             state, reward, terminated, truncated, _ = env.step(action)
+            # in Freeway reward is 1 every time the chicken gets to the top
             crossings += int(reward)
             episode_length += 1
             done = terminated or truncated
